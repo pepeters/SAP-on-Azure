@@ -86,8 +86,8 @@ az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-da
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk1 --sku Premium_LRS --size 512 --lun 1 --new --caching None #/hana/data disk1
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk2 --sku Premium_LRS --size 512 --lun 2 --new --caching None #/hana/data disk2
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk3 --sku Premium_LRS --size 512 --lun 3 --new --caching None #/hana/data disk3
-az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk4 --sku Premium_LRS --size 512 --lun 4 --new --caching None # --enable-write-accelerator #/hana/log disk1
-az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk5 --sku Premium_LRS --size 512 --lun 5 --new --caching None # --enable-write-accelerator #/hana/log disk2
+az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk4 --sku Premium_LRS --size 512 --lun 4 --new --caching None --enable-write-accelerator #/hana/log disk1
+az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk5 --sku Premium_LRS --size 512 --lun 5 --new --caching None --enable-write-accelerator #/hana/log disk2
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk6 --sku Premium_LRS --size 512 --lun 6 --new --caching ReadOnly  #/hana/shared
 
 # enable Enable Azure Extension for SAP
