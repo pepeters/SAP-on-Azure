@@ -10,3 +10,6 @@ download the script
 adjust the parameters like subscription, Azure region, VM type, IP adress, naming conventions eG according your needs
 upload to your Azure cloud shell
 chmod +x nameofthescript.sh
+setup ssh of not already done
+
+# ssh-keygen -m PEM -t rsa -b 4096
