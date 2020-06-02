@@ -23,7 +23,7 @@ AppSubnetAddressPrefix=10.42.0.0/25     #change to your needs
 DbSubnetAddressPrefix=10.42.0.128/26    #change to your needs
 VnetAddressPrefix=10.42.0.0/24          #change to your needs
 AppVmSize=Standard_D4s_v3               #change to your needs
-DbVmSize=Standard_Standard_M32ls
+DbVmSize=Standard_M32ls
 
 az account set --subscription $AzSub
 az group create -g $RgName -l $AzLoc
