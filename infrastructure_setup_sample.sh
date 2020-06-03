@@ -50,7 +50,7 @@ VmName=vm-eun-${Workload}-app
 NicName=${VmName}_nic1
 az network public-ip create --name ${VmName}-pip --resource-group $RgName --dns-name ${VmName}-${RANDOM} --allocation-method dynamic # remove if not using public IP (only for sandbox/test), better to use jumpbox to access the SAP systems
 az network nic create --name $NicName --resource-group $RgName --vnet-name $VnetName --subnet $AppSubnetName --accelerated-networking true --public-ip-address ${VmName}-pip --network-security-group ''
-az vm create --name $VmName --resource-group $RgName  --os-disk-name ${VmName}-osdisk --os-disk-size-gb 64 --storage-sku Premium_LRS --size $AppVmSize  --location $AzLoc  --image $VmImage --admin-username=$VmAdminUsr --nics $NicName --ppg ppg-euw-${Workload}
+az vm create --name $VmName --resource-group $RgName  --os-disk-name ${VmName}-osdisk --os-disk-size-gb 64 --storage-sku Premium_LRS --size $AppVmSize  --location $AzLoc  --image $VmImage --admin-username=$VmAdminUsr --nics $NicName --ppg ppg-eun-${Workload}
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk0 --sku Premium_LRS --size 64 --lun 0 --new --caching None
 
 # enable Enable Azure Extension for SAP
@@ -81,7 +81,7 @@ VmName=vm-eun-${Workload}-db
 NicName=${VmName}_nic1
 az network public-ip create --name ${VmName}-pip --resource-group $RgName --dns-name ${VmName}-${RANDOM} --allocation-method dynamic # remove if not using public IP (only for sandbox/test)
 az network nic create --name $NicName --resource-group $RgName --vnet-name $VnetName --subnet $DbSubnetName --accelerated-networking true --public-ip-address ${VmName}-pip
-az vm create --name $VmName --resource-group $RgName  --os-disk-name ${VmName}-osdisk --os-disk-size-gb 64 --storage-sku Premium_LRS --size $DbVmSize  --location $AzLoc  --image $VmImage --admin-username=$VmAdminUsr --nics $NicName --ppg ppg-euw-${Workload}
+az vm create --name $VmName --resource-group $RgName  --os-disk-name ${VmName}-osdisk --os-disk-size-gb 64 --storage-sku Premium_LRS --size $DbVmSize  --location $AzLoc  --image $VmImage --admin-username=$VmAdminUsr --nics $NicName --ppg ppg-eun-${Workload}
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk0 --sku Premium_LRS --size 128 --lun 0 --new --caching None #/usr/sap
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk1 --sku Premium_LRS --size 512 --lun 1 --new --caching None #/hana/data disk1
 az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk2 --sku Premium_LRS --size 512 --lun 2 --new --caching None #/hana/data disk2
