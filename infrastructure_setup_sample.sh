@@ -29,18 +29,22 @@ az account set --subscription $AzSub
 az group create -g $RgName -l $AzLoc
 
 # create NSGs for subnets --- NSG rules created are just standard, please customize according your security requirements
-# az network nsg create --resource-group $RgName --name nsg-$AppSubnetName
-# az network nsg create --resource-group $RgName --name nsg-$DbSubnetName
+ az network nsg create --resource-group $RgName --name nsg-$AppSubnetName
+ az network nsg create --resource-group $RgName --name nsg-$DbSubnetName
 
 az network vnet create --name $VnetName --address-prefixes $VnetAddressPrefix --subnet-name $AppSubnetName --subnet-prefixes $AppSubnetAddressPrefix --location $AzLoc --resource-group $RgName   
 az network vnet subnet create --name $DbSubnetName --resource-group $RgName --vnet-name $VnetName --address-prefixes $DbSubnetAddressPrefix
 
 # update NSG -associate with subnets
-# az network vnet subnet update --resource-group $RgName --name $AppSubnetName --vnet-name $VnetName --network-security-group nsg-$AppSubnetName
-# az network vnet subnet update --resource-group $RgName --name $DbSubnetName --vnet-name $VnetName --network-security-group nsg-$DbSubnetName
-# az network nsg list --resource-group $RgName --output table
+az network vnet subnet update --resource-group $RgName --name $AppSubnetName --vnet-name $VnetName --network-security-group nsg-$AppSubnetName
+az network vnet subnet update --resource-group $RgName --name $DbSubnetName --vnet-name $VnetName --network-security-group nsg-$DbSubnetName
+az network nsg list --resource-group $RgName --output table
 
+# Create NSG rules
 # please create your rules within the NSG according https://docs.microsoft.com/en-us/cli/azure/network/nsg/rule?view=azure-cli-latest#az-network-nsg-rule-create
+# Example: two simple inbound rules for the DB subnet:
+az network nsg rule create -g $RgName -n inbound-allow-ssh --access allow --destination-address-prefix '*' --destination-port-range 22 --direction inbound --nsg-name nsg-$DbSubnetName --protocol tcp --source-address-prefix '*' --source-port-range '*' --priority 1000
+az network nsg rule create -g $RgName -n inbound-allow-api-server --access allow --destination-address-prefix '*' --destination-port-range 6443 --direction inbound --nsg-name nsg-$DbSubnetName --protocol tcp --source-address-prefix '*' --source-port-range '*' --priority 1001
 
 #create PPG
 az ppg create --resource-group $RgName --name ppg-euw-${Workload} --location $AzLoc --type Standard 
