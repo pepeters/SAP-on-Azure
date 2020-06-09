@@ -45,38 +45,7 @@ az network vnet subnet create --name $DbSubnetName --resource-group $RgName --vn
 #create PPG
 az ppg create --resource-group $RgName --name ppg-euw-${Workload} --location $AzLoc --type Standard 
 
-# app server first
-VmName=vm-eun-${Workload}-app
-NicName=${VmName}_nic1
-az network public-ip create --name ${VmName}-pip --resource-group $RgName --dns-name ${VmName}-${RANDOM} --allocation-method dynamic # remove if not using public IP (only for sandbox/test), better to use jumpbox to access the SAP systems
-az network nic create --name $NicName --resource-group $RgName --vnet-name $VnetName --subnet $AppSubnetName --accelerated-networking true --public-ip-address ${VmName}-pip --network-security-group ''
-az vm create --name $VmName --resource-group $RgName  --os-disk-name ${VmName}-osdisk --os-disk-size-gb 64 --storage-sku Premium_LRS --size $AppVmSize  --location $AzLoc  --image $VmImage --admin-username=$VmAdminUsr --nics $NicName --ppg ppg-eun-${Workload}
-az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk0 --sku Premium_LRS --size 64 --lun 0 --new --caching None
-
-# enable Enable Azure Extension for SAP
-az extension add --name aem
-az vm aem set -g $RgName -n $VmName
-
-PubIpFqdn=`az network public-ip list --resource-group $RgName| grep fqdn | grep $VmName | awk '{print $2}'| sed 's/.\{2\}$//'| cut -c2-`
-# do stuff inside app VM    filesystem creation for HANA https://docs.microsoft.com/en-us/azure/virtual-machines/workloads/sap/sap-hana-high-availability
-ssh -oStrictHostKeyChecking=no ${VmAdminUsr}@${PubIpFqdn} << EOF
-sudo pvcreate /dev/disk/azure/scsi1/lun0
-sudo vgcreate vg_sap /dev/disk/azure/scsi1/lun0
-sudo lvcreate -n lv_sap -l +100%FREE vg_sap
-sudo mkfs.xfs /dev/mapper/vg_sap-lv_sap
-sudo mkdir -p /usr/sap
-sudo su -
-echo '/dev/mapper/vg_sap-lv_sap /usr/sap   xfs      defaults,nofail,nobarrier      0 2' >> /etc/fstab
-mount -a
-sed -i 's/ResourceDisk.Format=n/ResourceDisk.Format=y/g' /etc/waagent.conf
-sed -i 's/ResourceDisk.EnableSwap=n/ResourceDisk.EnableSwap=y/g' /etc/waagent.conf
-sed -i 's/ResourceDisk.SwapSizeMB=0/ResourceDisk.SwapSizeMB=20480/g' /etc/waagent.conf
-systemctl restart waagent
-swapon -s
-EOF
-
-
-# DB server next
+# DB server
 VmName=vm-eun-${Workload}-db
 NicName=${VmName}_nic1
 az network public-ip create --name ${VmName}-pip --resource-group $RgName --dns-name ${VmName}-${RANDOM} --allocation-method dynamic # remove if not using public IP (only for sandbox/test)
@@ -132,4 +101,34 @@ zypper install -t pattern -y sap-hana
 saptune solution apply HANA
 saptune daemon start
 reboot
+EOF
+
+# app server
+VmName=vm-eun-${Workload}-app
+NicName=${VmName}_nic1
+az network public-ip create --name ${VmName}-pip --resource-group $RgName --dns-name ${VmName}-${RANDOM} --allocation-method dynamic # remove if not using public IP (only for sandbox/test), better to use jumpbox to access the SAP systems
+az network nic create --name $NicName --resource-group $RgName --vnet-name $VnetName --subnet $AppSubnetName --accelerated-networking true --public-ip-address ${VmName}-pip --network-security-group ''
+az vm create --name $VmName --resource-group $RgName  --os-disk-name ${VmName}-osdisk --os-disk-size-gb 64 --storage-sku Premium_LRS --size $AppVmSize  --location $AzLoc  --image $VmImage --admin-username=$VmAdminUsr --nics $NicName --ppg ppg-eun-${Workload}
+az vm disk attach --resource-group $RgName --vm-name $VmName --name ${VmName}-datadisk0 --sku Premium_LRS --size 64 --lun 0 --new --caching None
+
+# enable Enable Azure Extension for SAP
+az extension add --name aem
+az vm aem set -g $RgName -n $VmName
+
+PubIpFqdn=`az network public-ip list --resource-group $RgName| grep fqdn | grep $VmName | awk '{print $2}'| sed 's/.\{2\}$//'| cut -c2-`
+# do stuff inside app VM    filesystem creation for HANA https://docs.microsoft.com/en-us/azure/virtual-machines/workloads/sap/sap-hana-high-availability
+ssh -oStrictHostKeyChecking=no ${VmAdminUsr}@${PubIpFqdn} << EOF
+sudo pvcreate /dev/disk/azure/scsi1/lun0
+sudo vgcreate vg_sap /dev/disk/azure/scsi1/lun0
+sudo lvcreate -n lv_sap -l +100%FREE vg_sap
+sudo mkfs.xfs /dev/mapper/vg_sap-lv_sap
+sudo mkdir -p /usr/sap
+sudo su -
+echo '/dev/mapper/vg_sap-lv_sap /usr/sap   xfs      defaults,nofail,nobarrier      0 2' >> /etc/fstab
+mount -a
+sed -i 's/ResourceDisk.Format=n/ResourceDisk.Format=y/g' /etc/waagent.conf
+sed -i 's/ResourceDisk.EnableSwap=n/ResourceDisk.EnableSwap=y/g' /etc/waagent.conf
+sed -i 's/ResourceDisk.SwapSizeMB=0/ResourceDisk.SwapSizeMB=20480/g' /etc/waagent.conf
+systemctl restart waagent
+swapon -s
 EOF
