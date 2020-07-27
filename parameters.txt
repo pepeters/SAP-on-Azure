@@ -1,0 +1,110 @@
+# use this file to create parameters
+# WRITE IN SPECIFIED LOWERCASE OR UPPERCASE (THAT MEANS ALL CHARACTERS)
+# Azure specific parameters first
+
+# specify your Azure subscription ID (just the ID, not name, e.g. ebea7935-160d-4cfaffaf-blabla....)
+export AZSUB=53a714bd-16c5-4f1e-b796-bbcbfdce2736
+
+# specify your azure deployment region, westeurope, useast2, etc
+# ensure to pick a zone with Availability Zones (or adapt scripts to not use AvZone)
+# lowercase
+export AZLOC=Northeurope
+
+# specify azure deployment region in short 3 letter format, e.g weu for westeurope, ue2 for USeast2, frn for France North etc
+# or leave blank if you don't like it
+# lowercase
+export AZLOCTLA=neu
+
+# specify the resource group name - this should be empty
+# lowercase
+export RESOURCEGROUP=pepeters
+
+# specify OS username for first user to be deployed during VM creation
+# root or <sapsid>adm are forbidden, use own user for emergency access with ssh key, e.g. andrea, susan or jeniffer
+# lowercase
+export ADMINUSR=petrape
+
+# specify ssh public key file (.pub typically) which can be used for deployment
+# provide with FULL absolute path for the file, within doublequotes (e.g. "/home/bob/.ssh/id_rsa.pub")
+export ADMINUSRSSH="/home/petra/.ssh/id_rsa.pub"
+
+# specify subdomain name to be used for your jumpserver - e.g. bobsjumphost or susanjumpbox
+# lowercase
+export JUMPFQDN=petrasjumpbox
+
+# specify IP range to use for hub VNET, if not sure use 10.10.10.0/24
+# must be at least /25 network or larger, include the network size too! e.g. 10.10.10.0/24 as value
+export HUBIP=10.10.10.0/24
+
+# specify IP range to use for SAP VNET, if not sure use 10.10.20.0/24, DIFFERENT TO HUB VNET, duh
+# must be at least /24 network or larger, include the network size too! e.g. 10.10.10.0/24 as value
+# last octet must be 0
+export SAPIP=10.10.20.0/24
+
+# ---- IMPORTANT ----
+# SAP software needs to be pre-downloaded and made available in specific naming convention for the script to pick it uppercase
+# if you are using your own storage account in same subscription, specify values for STORACC, STORACCRG, STORCONTAINER
+# if you are using a storage account from someone else's subscription, specify values for STORACCURL, STORSAS
+# DO NOT specify both sets of variables, only one pair or the other!
+
+# specify storage account URL holding the SAP software
+# this would be e.g. https://<account_name>.blob.core.windows.net/<container>/
+# do include the trailing slash, DO NOT specify the actual blobs/files, those are set as per requirements section
+export STORACCURL=https://saeunsapsoft.blob.core.windows.net/sapsoft/
+
+# specify storage account SAS token for STORACCURL container
+# Generate a SAS token e.g. through portal or az storage blob generate-sas
+# use single quotes as SAS tokens contain special characters, e.g. STORSAS='?sv=2018-02-02&ss=bf&srt=co&sp=rl&se=2018-12-31T17:40:37Z&st=2019-10-15T08:40:37Z&spr=https&sig=PQ4MRxedxKZWF3ygKh6j83Ql8WCcZxsYIDakxpTTfkQ%3D'
+# parameter starts with single quote and question mark
+export STORSAS='?sv=2019-02-02&ss=bf&srt=sco&sp=rl&se=2021-03-05T22:27:35Z&st=2020-03-05T14:27:35Z&spr=https&sig=m9M%2BGHIW5OVvLRSzgAlHwuwjiGA13GHXo7kEDFvqSis%3D'
+
+# specify storage account holding your SAP software and tools
+# just the name of your storage account, not URL
+# LEAVE UNCHANGED EMPTY IF NOT USING YOUR OWN STORAGE ACCOUNT BUT SPECIFIED STORACCURL AND STORSAS PARAMETERS!
+# in lowercase
+export STORACC=
+
+# specify storage account resource group - likely a different one than the holding your SAP system
+# LEAVE UNCHANGED EMPTY IF NOT USING YOUR OWN STORAGE ACCOUNT BUT SPECIFIED STORACCURL AND STORSAS PARAMETERS!
+# lower/uppercase exactly as per resource group's name
+export STORACCRG=
+
+# specify the container name (blob container) where your SAP files are stored under
+# LEAVE UNCHANGED EMPTY IF NOT USING YOUR OWN STORAGE ACCOUNT BUT SPECIFIED STORACCURL AND STORSAS PARAMETERS!
+# lower/uppercase exactly as per container's name
+export STORCONTAINER=
+
+# --- specify SAP specific parameters now ---
+# SAP SID of the system you want to install
+# uppercase
+export SAPSID=PES
+
+# HANA SID of the system you want to install
+# uppercase
+export HANASID=PES
+
+# SAP ASCS instance number
+export ASCSNO=00
+
+# SAP instance number for first app server (any app server will just increase by 1 from this)
+export PASNO=01
+
+# HANA instance numbers
+export HDBNO=02
+
+# specify master password - will be used for all OS users (sidadm, sapadm etc) as well as SAP and DB logons
+# Must contains one upper and lowercase character each and one number, lenght 8 alphanumeric chars minimum
+# Example values: Welcome1  or Azureisbest1
+export MASTERPW=Welcome1
+
+# Install ERS instances? If not, VM <sapsid>ascs02 will not be created, same for ASCS load balancer
+# valid values: true|false (lowercase)
+export INSTALLERS=false
+
+# Install additional AAS? If not, VM <sapsid>app02 will not be created
+# valid values: true|false (lowercase)
+export INSTALLAAS=true
+
+# Install second DB and setup HANA replication? If not, VM <sapsid>db02 will not be created, same for DB load balancer
+# valid values: true|false (lowercase)
+export INSTALLDB2=true
